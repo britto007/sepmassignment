@@ -1,0 +1,14 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/kuet_ums}
+    username: ${SPRING_DATASOURCE_USERNAME:kuet}
+    password: ${SPRING_DATASOURCE_PASSWORD:kuet}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  thymeleaf:
+    cache: false

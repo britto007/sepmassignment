@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' · KUET UMS'">KUET UMS</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header class="topbar" th:fragment="header">
+    <div class="brand">
+        <span class="mark">KU</span>
+        <div>
+            <strong>KUET UMS</strong>
+            <small>University Management System</small>
+        </div>
+    </div>
+    <nav>
+        <a sec:authorize="hasRole('ADMIN')"
+           th:href="@{/admins}"
+           th:classappend="${#strings.startsWith(requestUri, '/admins')} ? 'active'">Admins</a>
+        <a sec:authorize="hasAnyRole('ADMIN','TEACHER')"
+           th:href="@{/teachers}"
+           th:classappend="${#strings.startsWith(requestUri, '/teachers')} ? 'active'">Teachers</a>
+        <a sec:authorize="hasAnyRole('ADMIN','STUDENT')"
+           th:href="@{/students}"
+           th:classappend="${#strings.startsWith(requestUri, '/students')} ? 'active'">Students</a>
+        <a th:href="@{/courses}"
+           th:classappend="${#strings.startsWith(requestUri, '/courses')} ? 'active'">Courses</a>
+    </nav>
+    <div class="userbox">
+        <span sec:authentication="name">user</span>
+        <form th:action="@{/logout}" method="post">
+            <button class="linkish" type="submit">Logout</button>
+        </form>
+    </div>
+</header>
+</body>
+</html>

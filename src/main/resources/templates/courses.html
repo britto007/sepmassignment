@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Courses')}"></head>
+<body>
+<header th:replace="~{fragments :: header}"></header>
+<main>
+    <div class="page-head">
+        <div>
+            <h1>Courses</h1>
+            <p sec:authorize="hasRole('ADMIN')">You can create a course, assign any teacher, and edit or delete any course.</p>
+            <p sec:authorize="hasRole('TEACHER')">You can add a course. It is assigned to you, and you can edit or delete only your own courses.</p>
+            <p sec:authorize="hasRole('STUDENT')">You can see every course, enroll, and drop your own enrollment.</p>
+        </div>
+    </div>
+    <p class="alert success" th:if="${success}" th:text="${success}">Saved.</p>
+    <p class="alert error" th:if="${error}" th:text="${error}">Error.</p>
+    <div class="layout">
+        <section class="panel" sec:authorize="hasAnyRole('ADMIN','TEACHER')">
+            <h2>New course</h2>
+            <p class="alert error" th:if="${formError != null and editingId == null}" th:text="${formError}">Error.</p>
+            <form class="stack" th:action="@{/courses}" th:object="${createForm}" method="post">
+                <label>
+                    Course code
+                    <input th:field="*{code}" required minlength="2" maxlength="20">
+                    <p class="field-error" th:errors="*{code}"></p>
+                </label>
+                <label>
+                    Title
+                    <input th:field="*{title}" required maxlength="160">
+                    <p class="field-error" th:errors="*{title}"></p>
+                </label>
+                <label>
+                    Department
+                    <input th:field="*{department}" required maxlength="100">
+                    <p class="field-error" th:errors="*{department}"></p>
+                </label>
+                <label>
+                    Credit hours
+                    <input type="number" th:field="*{creditHours}" required min="1" max="6">
+                    <p class="field-error" th:errors="*{creditHours}"></p>
+                </label>
+                <label sec:authorize="hasRole('ADMIN')">
+                    Teacher
+                    <select th:field="*{teacherId}" required>
+                        <option th:each="teacher : ${teachers}"
+                                th:value="${teacher.id}"
+                                th:text="${teacher.fullName + ' (' + teacher.username + ')'}">Teacher</option>
+                    </select>
+                </label>
+                <button class="primary" type="submit">Create course</button>
+            </form>
+        </section>
+        <section class="panel">
+            <div th:if="${editingId != null}">
+                <h2 th:text="'Edit course #' + ${editingId}">Edit course</h2>
+                <p class="alert error" th:if="${formError != null}" th:text="${formError}">Error.</p>
+                <form class="stack" th:action="@{/courses/{id}(id=${editingId})}" th:object="${editForm}" method="post">
+                    <label>
+                        Course code
+                        <input th:field="*{code}" required minlength="2" maxlength="20">
+                        <p class="field-error" th:errors="*{code}"></p>
+                    </label>
+                    <label>
+                        Title
+                        <input th:field="*{title}" required maxlength="160">
+                        <p class="field-error" th:errors="*{title}"></p>
+                    </label>
+                    <label>
+                        Department
+                        <input th:field="*{department}" required maxlength="100">
+                        <p class="field-error" th:errors="*{department}"></p>
+                    </label>
+                    <label>
+                        Credit hours
+                        <input type="number" th:field="*{creditHours}" required min="1" max="6">
+                        <p class="field-error" th:errors="*{creditHours}"></p>
+                    </label>
+                    <label sec:authorize="hasRole('ADMIN')">
+                        Teacher
+                        <select th:field="*{teacherId}" required>
+                            <option th:each="teacher : ${teachers}"
+                                    th:value="${teacher.id}"
+                                    th:text="${teacher.fullName + ' (' + teacher.username + ')'}">Teacher</option>
+                        </select>
+                    </label>
+                    <div class="actions">
+                        <button class="primary" type="submit">Save changes</button>
+                        <a class="button ghost" th:href="@{/courses}">Cancel</a>
+                    </div>
+                </form>
+            </div>
+            <h2>All courses</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Title</th>
+                        <th>Department</th>
+                        <th>Credits</th>
+                        <th>Teacher</th>
+                        <th>Students</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(courses)}">
+                        <td colspan="7">No courses yet.</td>
+                    </tr>
+                    <tr th:each="course : ${courses}">
+                        <td th:text="${course.code}">CSE 1101</td>
+                        <td th:text="${course.title}">Title</td>
+                        <td th:text="${course.department}">Department</td>
+                        <td th:text="${course.creditHours}">3</td>
+                        <td th:text="${course.teacherName}">Teacher</td>
+                        <td>
+                            <p th:if="${#lists.isEmpty(course.students)}">No students yet.</p>
+                            <ul class="roster" th:unless="${#lists.isEmpty(course.students)}">
+                                <li th:each="student : ${course.students}">
+                                    <span th:text="${student.fullName + ' (' + student.rollNumber + ')'}">Student</span>
+                                    <form th:if="${#authorization.expression('hasRole(''ADMIN'')') or course.teacherUsername == #authentication.name}"
+                                          th:action="@{/courses/{id}/enrollments/{studentId}/remove(id=${course.id}, studentId=${student.studentId})}"
+                                          method="post">
+                                        <button class="danger" type="submit">Remove</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </td>
+                        <td>
+                            <div class="row-actions">
+                                <form sec:authorize="hasRole('STUDENT')"
+                                      th:if="${!course.enrolled}"
+                                      th:action="@{/courses/{id}/enroll(id=${course.id})}"
+                                      method="post">
+                                    <button class="primary" type="submit">Enroll</button>
+                                </form>
+                                <form sec:authorize="hasRole('STUDENT')"
+                                      th:if="${course.enrolled}"
+                                      th:action="@{/courses/{id}/drop(id=${course.id})}"
+                                      method="post">
+                                    <button type="submit">Drop</button>
+                                </form>
+                                <a class="button ghost"
+                                   th:if="${#authorization.expression('hasRole(''ADMIN'')') or course.teacherUsername == #authentication.name}"
+                                   th:href="@{/courses/{id}/edit(id=${course.id})}">Edit</a>
+                                <form th:if="${#authorization.expression('hasRole(''ADMIN'')') or course.teacherUsername == #authentication.name}"
+                                      th:action="@{/courses/{id}/delete(id=${course.id})}"
+                                      method="post"
+                                      onsubmit="return confirm('Delete this course and its enrollments?')">
+                                    <button class="danger" type="submit">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</main>
+</body>
+</html>

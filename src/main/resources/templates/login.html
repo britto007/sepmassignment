@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sign in · KUET UMS</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="login-shell">
+    <section class="login-card">
+        <div class="login-banner">
+            <span class="eyebrow">Khulna University of Engineering &amp; Technology</span>
+            <h1>University Management System</h1>
+            <p>Sign in with an admin, teacher, or student account.</p>
+        </div>
+        <form th:action="@{/login}" method="post" class="stack">
+            <p class="alert error" th:if="${param.error}">Invalid username or password.</p>
+            <p class="alert success" th:if="${param.logout}">You have been logged out.</p>
+            <label>
+                Username
+                <input type="text" name="username" autocomplete="username" required autofocus>
+            </label>
+            <label>
+                Password
+                <input type="password" name="password" autocomplete="current-password" required>
+            </label>
+            <button class="primary" type="submit">Sign in</button>
+        </form>
+        <div class="credentials">
+            <h2>Demo accounts</h2>
+            <table>
+                <thead>
+                <tr>
+                    <th>Role</th>
+                    <th>Username</th>
+                    <th>Password</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Admin</td>
+                    <td>admin</td>
+                    <td>admin123</td>
+                </tr>
+                <tr>
+                    <td>Teacher</td>
+                    <td>teacher</td>
+                    <td>teacher123</td>
+                </tr>
+                <tr>
+                    <td>Student</td>
+                    <td>student</td>
+                    <td>student123</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

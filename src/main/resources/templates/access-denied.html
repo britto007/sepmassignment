@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Access denied')}"></head>
+<body>
+<header th:replace="~{fragments :: header}"></header>
+<main>
+    <section class="panel denied">
+        <h1>Access denied</h1>
+        <p>Your role cannot open that page. Use the navigation to return to a resource you can manage.</p>
+        <div class="actions">
+            <a class="button primary" sec:authorize="hasRole('ADMIN')" th:href="@{/admins}">Go to admins</a>
+            <a class="button primary" sec:authorize="hasRole('TEACHER')" th:href="@{/teachers}">Go to teachers</a>
+            <a class="button primary" sec:authorize="hasRole('STUDENT')" th:href="@{/students}">Go to students</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

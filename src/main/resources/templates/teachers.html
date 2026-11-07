@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Teachers')}"></head>
+<body>
+<header th:replace="~{fragments :: header}"></header>
+<main>
+    <div class="page-head">
+        <div>
+            <h1>Teachers</h1>
+            <p>You can add a teacher and view every teacher. You can edit only your own account.</p>
+        </div>
+    </div>
+    <p class="alert success" th:if="${success}" th:text="${success}">Saved.</p>
+    <p class="alert error" th:if="${error}" th:text="${error}">Error.</p>
+    <div class="layout">
+        <section class="panel">
+            <h2>New teacher</h2>
+            <p class="alert error" th:if="${formError != null and editingId == null}" th:text="${formError}">Error.</p>
+            <form class="stack" th:action="@{/teachers}" th:object="${createForm}" method="post">
+                <label>
+                    Full name
+                    <input th:field="*{fullName}" required maxlength="120">
+                    <p class="field-error" th:errors="*{fullName}"></p>
+                </label>
+                <label>
+                    Email
+                    <input type="email" th:field="*{email}" required maxlength="180">
+                    <p class="field-error" th:errors="*{email}"></p>
+                </label>
+                <label>
+                    Username
+                    <input th:field="*{username}" required minlength="3" maxlength="50">
+                    <p class="field-error" th:errors="*{username}"></p>
+                </label>
+                <label>
+                    Department
+                    <input th:field="*{department}" required maxlength="100">
+                    <p class="field-error" th:errors="*{department}"></p>
+                </label>
+                <label>
+                    Designation
+                    <input th:field="*{designation}" required maxlength="100">
+                    <p class="field-error" th:errors="*{designation}"></p>
+                </label>
+                <label>
+                    Password
+                    <input type="password" th:field="*{password}" required minlength="6" maxlength="72" autocomplete="new-password">
+                    <p class="hint">At least 6 characters.</p>
+                    <p class="field-error" th:errors="*{password}"></p>
+                </label>
+                <button class="primary" type="submit">Create teacher</button>
+            </form>
+        </section>
+        <section class="panel">
+            <div th:if="${editingId != null}">
+                <h2 th:text="'Edit teacher #' + ${editingId}">Edit teacher</h2>
+                <p class="alert error" th:if="${formError != null}" th:text="${formError}">Error.</p>
+                <form class="stack" th:action="@{/teachers/{id}(id=${editingId})}" th:object="${editForm}" method="post">
+                    <label>
+                        Full name
+                        <input th:field="*{fullName}" required maxlength="120">
+                        <p class="field-error" th:errors="*{fullName}"></p>
+                    </label>
+                    <label>
+                        Email
+                        <input type="email" th:field="*{email}" required maxlength="180">
+                        <p class="field-error" th:errors="*{email}"></p>
+                    </label>
+                    <label>
+                        Username
+                        <input th:field="*{username}" required minlength="3" maxlength="50">
+                        <p class="field-error" th:errors="*{username}"></p>
+                    </label>
+                    <label>
+                        Department
+                        <input th:field="*{department}" required maxlength="100">
+                        <p class="field-error" th:errors="*{department}"></p>
+                    </label>
+                    <label>
+                        Designation
+                        <input th:field="*{designation}" required maxlength="100">
+                        <p class="field-error" th:errors="*{designation}"></p>
+                    </label>
+                    <label>
+                        Password
+                        <input type="password" th:field="*{password}" minlength="6" maxlength="72" autocomplete="new-password">
+                        <p class="hint">Leave blank to keep the current password.</p>
+                        <p class="field-error" th:errors="*{password}"></p>
+                    </label>
+                    <div class="actions">
+                        <button class="primary" type="submit">Save changes</button>
+                        <a class="button ghost" th:href="@{/teachers}">Cancel</a>
+                    </div>
+                </form>
+            </div>
+            <h2>All teachers</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Username</th>
+                        <th>Department</th>
+                        <th>Designation</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(teachers)}">
+                        <td colspan="6">No teacher accounts yet.</td>
+                    </tr>
+                    <tr th:each="teacher : ${teachers}">
+                        <td th:text="${teacher.fullName}">Name</td>
+                        <td th:text="${teacher.email}">Email</td>
+                        <td th:text="${teacher.username}">Username</td>
+                        <td th:text="${teacher.department}">Department</td>
+                        <td th:text="${teacher.designation}">Designation</td>
+                        <td>
+                            <div class="row-actions">
+                                <a class="button ghost"
+                                   th:if="${#authorization.expression('hasRole(''ADMIN'')') or teacher.username == #authentication.name}"
+                                   th:href="@{/teachers/{id}/edit(id=${teacher.id})}">Edit</a>
+                                <form sec:authorize="hasRole('ADMIN')"
+                                      th:if="${teacher.username != #authentication.name}"
+                                      th:action="@{/teachers/{id}/delete(id=${teacher.id})}"
+                                      method="post"
+                                      onsubmit="return confirm('Delete this teacher?')">
+                                    <button class="danger" type="submit">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</main>
+</body>
+</html>
